@@ -14,9 +14,12 @@ import Foundation
             print("Context size", contextSize)
 
             let instructions = Instructions("You're a helpful assistant that generates haiku.")
-            let tools = [MoodTool()]
             let instructionsTokenCount = try await model.tokenCount(for: instructions)
             print(instructionsTokenCount, model.formattedPercent(tokenCount: instructionsTokenCount, contextSize: contextSize))
+
+            let tools = [MoodTool()]
+            let toolsTokenCount = try await model.tokenCount(for: tools)
+            print(toolsTokenCount, model.formattedPercent(tokenCount: toolsTokenCount, contextSize: contextSize))
 
             let prompt = Prompt("Generate a haiku about Swift")
             let promptTokenCount = try await model.tokenCount(for: prompt)
