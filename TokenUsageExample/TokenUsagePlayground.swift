@@ -15,13 +15,12 @@ import Foundation
 
             let instructions = Instructions("You're a helpful assistant that generates haiku.")
             let tools = [MoodTool()]
-            let instructionsTokenUsage = try await model.tokenUsage(for: instructions,
-                                                                    tools: tools)
-            print(instructionsTokenUsage.tokenCount, instructionsTokenUsage.formattedPercent(ofContextSize: contextSize))
+            let instructionsTokenCount = try await model.tokenCount(for: instructions)
+            print(instructionsTokenCount, model.formattedPercent(tokenCount: instructionsTokenCount, contextSize: contextSize))
 
             let prompt = Prompt("Generate a haiku about Swift")
-            let promptTokenUsage = try await model.tokenUsage(for: prompt)
-            print(promptTokenUsage.tokenCount, promptTokenUsage.formattedPercent(ofContextSize: contextSize))
+            let promptTokenCount = try await model.tokenCount(for: prompt)
+            print(promptTokenCount, model.formattedPercent(tokenCount: promptTokenCount, contextSize: contextSize))
 
             let session = LanguageModelSession(model: model,
                                                tools: tools,
@@ -30,8 +29,8 @@ import Foundation
             let response = try await session.respond(to: prompt)
             print(response.content)
 
-            let transcriptTokenUsage = try await model.tokenUsage(for: session.transcript)
-            print(transcriptTokenUsage.tokenCount, transcriptTokenUsage.formattedPercent(ofContextSize: contextSize))
+            let transcriptTokenCount = try await model.tokenCount(for: session.transcript)
+            print(transcriptTokenCount, model.formattedPercent(tokenCount: transcriptTokenCount, contextSize: contextSize))
         } catch {
             print(error)
         }
@@ -55,14 +54,14 @@ struct MoodTool: Tool {
     }
 }
 
-extension SystemLanguageModel.TokenUsage {
-    func percent(ofContextSize contextSize: Int) -> Float {
+extension SystemLanguageModel {
+    func percent(tokenCount: Int, contextSize: Int) -> Float {
         guard contextSize > 0 else { return 0 }
         return Float(tokenCount) / Float(contextSize)
     }
 
-    func formattedPercent(ofContextSize contextSize: Int) -> String {
-        percent(ofContextSize: contextSize)
+    func formattedPercent(tokenCount: Int, contextSize: Int) -> String {
+        percent(tokenCount: tokenCount, contextSize: contextSize)
             .formatted(.percent.precision(.fractionLength(0)).rounded(rule: .down))
     }
 }
